@@ -82,11 +82,10 @@ int32_t ecall_file_close(SGX_FILE* fp)
 	return a;
 }
 
-/*
-* int32_t ecall_file_delete(char* filename)
+int32_t ecall_file_delete(char* filename)
 {
 	int32_t a;
 	a = sgx_remove(filename);
 	return a;
 }
-*/
+

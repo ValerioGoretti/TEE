@@ -58,8 +58,8 @@ void passFile() {
 void playWithFiles(sgx_status_t ret, sgx_enclave_id_t eid, char *buffer) {
 	SGX_FILE* fp;
 	const char* filename = "SGX_File_Protection_System.txt";
-	//const char* mode = "w+";
-	const char* mode = "r";
+	const char* mode = "w+";
+	//const char* mode = "r";
 
 	//file Open
 	ret = ecall_file_open(eid, &fp, filename, mode);
@@ -87,13 +87,15 @@ void playWithFiles(sgx_status_t ret, sgx_enclave_id_t eid, char *buffer) {
 	ret = ecall_file_close(eid, &fileHandle, fp);
 }
 
-/*
+
 void removeFile(sgx_enclave_id_t eid) {
-	int32_t r;
-	const char* filename = "SGX_File_Protection_System.txt";
-	r = ecall_file_delete(eid,  filename);
+	sgx_status_t r;
+	int32_t filehandler;
+	char filename[] = "SGX_File_Protection_System.txt";
+	r = ecall_file_delete(eid, &filehandler, filename);
 	printf("%" PRId32 "\n", r);
-}*/
+	printf("%s REMOVED", filename);
+}
 
 int main()
 {
@@ -113,8 +115,10 @@ int main()
 		return -1;
 	}
 
+	//Apri(o crea) -> scrivi -> leggi -> chiudi file
 	playWithFiles(ret, eid, buffer);
 	
+	//Rimuovi un file già creato, aggiungere passaggio del filename?
 	//removeFile(eid);
 
 	while (again) {

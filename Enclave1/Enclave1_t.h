@@ -29,6 +29,7 @@ SGX_FILE* ecall_file_open(const char* filename, const char* mode);
 size_t ecall_file_write(SGX_FILE* fp, char data[100]);
 size_t ecall_file_read(SGX_FILE* fp, char* readData);
 int32_t ecall_file_close(SGX_FILE* fp);
+int32_t ecall_file_delete(char* filename);
 
 sgx_status_t SGX_CDECL sgx_oc_cpuidex(int cpuinfo[4], int leaf, int subleaf);
 sgx_status_t SGX_CDECL sgx_thread_wait_untrusted_event_ocall(int* retval, const void* self);

@@ -68,6 +68,12 @@ typedef struct ms_ecall_file_close_t {
 	SGX_FILE* ms_fp;
 } ms_ecall_file_close_t;
 
+typedef struct ms_ecall_file_delete_t {
+	int32_t ms_retval;
+	char* ms_filename;
+	size_t ms_filename_len;
+} ms_ecall_file_delete_t;
+
 typedef struct ms_sgx_oc_cpuidex_t {
 	int* ms_cpuinfo;
 	int ms_leaf;
@@ -549,11 +555,62 @@ err:
 	return status;
 }
 
+static sgx_status_t SGX_CDECL sgx_ecall_file_delete(void* pms)
+{
+	CHECK_REF_POINTER(pms, sizeof(ms_ecall_file_delete_t));
+	//
+	// fence after pointer checks
+	//
+	sgx_lfence();
+	ms_ecall_file_delete_t* ms = SGX_CAST(ms_ecall_file_delete_t*, pms);
+	sgx_status_t status = SGX_SUCCESS;
+	char* _tmp_filename = ms->ms_filename;
+	size_t _len_filename = ms->ms_filename_len ;
+	char* _in_filename = NULL;
+	int32_t _in_retval;
+
+	CHECK_UNIQUE_POINTER(_tmp_filename, _len_filename);
+
+	//
+	// fence after pointer checks
+	//
+	sgx_lfence();
+
+	if (_tmp_filename != NULL && _len_filename != 0) {
+		_in_filename = (char*)malloc(_len_filename);
+		if (_in_filename == NULL) {
+			status = SGX_ERROR_OUT_OF_MEMORY;
+			goto err;
+		}
+
+		if (memcpy_s(_in_filename, _len_filename, _tmp_filename, _len_filename)) {
+			status = SGX_ERROR_UNEXPECTED;
+			goto err;
+		}
+
+		_in_filename[_len_filename - 1] = '\0';
+		if (_len_filename != strlen(_in_filename) + 1)
+		{
+			status = SGX_ERROR_UNEXPECTED;
+			goto err;
+		}
+	}
+	_in_retval = ecall_file_delete(_in_filename);
+	if (MEMCPY_S(&ms->ms_retval, sizeof(ms->ms_retval), &_in_retval, sizeof(_in_retval))) {
+		status = SGX_ERROR_UNEXPECTED;
+		goto err;
+	}
+
+err:
+	if (_in_filename) free(_in_filename);
+	return status;
+}
+
 SGX_EXTERNC const struct {
 	size_t nr_ecall;
-	struct {void* call_addr; uint8_t is_priv; uint8_t is_switchless;} ecall_table[7];
+	struct {void* call_addr; uint8_t is_priv; uint8_t is_switchless;} ecall_table[8];
 } g_ecall_table = {
-	7,
+	8,
 	{
 		{(void*)(uintptr_t)sgx_getSecret, 0, 0},
 		{(void*)(uintptr_t)sgx_setSecret, 0, 0},
@@ -562,34 +619,35 @@ SGX_EXTERNC const struct {
 		{(void*)(uintptr_t)sgx_ecall_file_write, 0, 0},
 		{(void*)(uintptr_t)sgx_ecall_file_read, 0, 0},
 		{(void*)(uintptr_t)sgx_ecall_file_close, 0, 0},
+		{(void*)(uintptr_t)sgx_ecall_file_delete, 0, 0},
 	}
 };
 
 SGX_EXTERNC const struct {
 	size_t nr_ocall;
-	uint8_t entry_table[19][7];
+	uint8_t entry_table[19][8];
 } g_dyn_entry_table = {
 	19,
 	{
-		{0, 0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, 0, },
-		{0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, },
+		{0, 0, 0, 0, 0, 0, 0, 0, },
 	}
 };
 

@@ -42,6 +42,12 @@ typedef struct ms_ecall_file_close_t {
 	SGX_FILE* ms_fp;
 } ms_ecall_file_close_t;
 
+typedef struct ms_ecall_file_delete_t {
+	int32_t ms_retval;
+	char* ms_filename;
+	size_t ms_filename_len;
+} ms_ecall_file_delete_t;
+
 typedef struct ms_sgx_oc_cpuidex_t {
 	int* ms_cpuinfo;
 	int ms_leaf;
@@ -418,6 +424,17 @@ sgx_status_t ecall_file_close(sgx_enclave_id_t eid, int32_t* retval, SGX_FILE* f
 	ms_ecall_file_close_t ms;
 	ms.ms_fp = fp;
 	status = sgx_ecall(eid, 6, &ocall_table_Enclave1, &ms);
+	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
+	return status;
+}
+
+sgx_status_t ecall_file_delete(sgx_enclave_id_t eid, int32_t* retval, char* filename)
+{
+	sgx_status_t status;
+	ms_ecall_file_delete_t ms;
+	ms.ms_filename = filename;
+	ms.ms_filename_len = filename ? strlen(filename) + 1 : 0;
+	status = sgx_ecall(eid, 7, &ocall_table_Enclave1, &ms);
 	if (status == SGX_SUCCESS && retval) *retval = ms.ms_retval;
 	return status;
 }

@@ -99,6 +99,7 @@ sgx_status_t ecall_file_open(sgx_enclave_id_t eid, SGX_FILE** retval, const char
 sgx_status_t ecall_file_write(sgx_enclave_id_t eid, size_t* retval, SGX_FILE* fp, char data[100]);
 sgx_status_t ecall_file_read(sgx_enclave_id_t eid, size_t* retval, SGX_FILE* fp, char* readData);
 sgx_status_t ecall_file_close(sgx_enclave_id_t eid, int32_t* retval, SGX_FILE* fp);
+sgx_status_t ecall_file_delete(sgx_enclave_id_t eid, int32_t* retval, char* filename);
 
 #ifdef __cplusplus
 }
