@@ -5,6 +5,9 @@
 #include "sgx_urts.h"
 #include <string.h>
 #include "Enclave1_u.h"
+#include <inttypes.h>
+#include "sgx_tprotected_fs.h"
+
 #define ENCLAVE_FILE _T("Enclave1.signed.dll")
 #define MAX_BUF_LEN 100
 
@@ -52,6 +55,46 @@ void passFile() {
 	}
 }
 
+void playWithFiles(sgx_status_t ret, sgx_enclave_id_t eid, char *buffer) {
+	SGX_FILE* fp;
+	const char* filename = "SGX_File_Protection_System.txt";
+	//const char* mode = "w+";
+	const char* mode = "r";
+
+	//file Open
+	ret = ecall_file_open(eid, &fp, filename, mode);
+
+	//Get Enclve Secret
+	ret = ecall_enclaveString(eid, buffer, MAX_BUF_LEN);
+	printf("Enclave Secret Value: %s\n", buffer);
+
+	//Write to file
+	size_t sizeOfWrite = 0;
+	ret = ecall_file_write(eid, &sizeOfWrite, fp, buffer);
+	printf("Size of Write=  %d\n", sizeOfWrite);
+
+	//Read from File
+	size_t sizeOfRead = 0;
+	char data[100];
+	ret = ecall_file_read(eid, &sizeOfRead, fp, data);
+	printf("Size of Read= %d\n", sizeOfRead);
+
+
+	//data[sizeOfRead] = '\0';
+	printf("Read file %s Data= %s\n", filename, data);
+
+	int32_t fileHandle;
+	ret = ecall_file_close(eid, &fileHandle, fp);
+}
+
+/*
+void removeFile(sgx_enclave_id_t eid) {
+	int32_t r;
+	const char* filename = "SGX_File_Protection_System.txt";
+	r = ecall_file_delete(eid,  filename);
+	printf("%" PRId32 "\n", r);
+}*/
+
 int main()
 {
 	sgx_enclave_id_t	eid;
@@ -70,6 +113,9 @@ int main()
 		return -1;
 	}
 
+	playWithFiles(ret, eid, buffer);
+	
+	//removeFile(eid);
 
 	while (again) {
 		printMenu();
