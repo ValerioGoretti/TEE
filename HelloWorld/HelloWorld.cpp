@@ -28,34 +28,41 @@ void prendiSecret(sgx_enclave_id_t eid) {
 	printf("\n The secret is: %s\n", buffer);
 }
 
-void showFile(FILE* f) {
-	char data[20];
-	fscanf_s(f, "%s", &data, sizeof(data));
-	printf("%s ", data);
+void createNewFile(sgx_enclave_id_t eid, sgx_status_t ret, char* buffer, char* filename) {
+	SGX_FILE* fp;
+	//const char* filename = "SGX_File_Protection_System.txt";
+	const char* mode = "w+";
+
+	//file Open
+	ret = ecall_file_open(eid, &fp, filename, mode);
+
+	//Write buffer value into the file
+	size_t sizeOfWrite = 0;
+	ret = ecall_file_write(eid, &sizeOfWrite, fp, buffer);
+	printf("Size of Write=  %d\n", sizeOfWrite);
+
+	int32_t fileHandle;
+	ret = ecall_file_close(eid, &fileHandle, fp);
 }
 
-void passFile() {
-	FILE* f;
-	errno_t err;
+void readFile(sgx_enclave_id_t eid, sgx_status_t ret, char* buffer, char* filename) {
+	SGX_FILE* fp;
+	const char* mode = "r";
 
-	//f = fopen("/file.txt", "r");
-	err = fopen_s(&f, "C:/Users/Asus/Desktop/TESI_MAGISTRALE/TEE/HelloWorld/file.txt", "r");
+	//file Open
+	ret = ecall_file_open(eid, &fp, filename, mode);
 	
-	if (err == 1) {
-		printf("1 Error - Operation not permitted");
-	}
-	else{
-		if (err == 2) {
-			printf("2 Error - No such file or directory");
-		}
-		else {
-		showFile(f);
-		fclose(f);
-		}
-	}
+	//Read from File
+	size_t sizeOfRead = 0;
+	char data[100];
+	ret = ecall_file_read(eid, &sizeOfRead, fp, data);
+	printf("Read file %s Data= %s\n", filename, data);
+	int32_t fileHandle;
+	ret = ecall_file_close(eid, &fileHandle, fp);
 }
 
-void playWithFiles(sgx_status_t ret, sgx_enclave_id_t eid, char *buffer) {
+/*
+void playWithFiles(sgx_status_t ret, sgx_enclave_id_t eid, char* buffer) {
 	SGX_FILE* fp;
 	const char* filename = "SGX_File_Protection_System.txt";
 	const char* mode = "w+";
@@ -85,8 +92,7 @@ void playWithFiles(sgx_status_t ret, sgx_enclave_id_t eid, char *buffer) {
 
 	int32_t fileHandle;
 	ret = ecall_file_close(eid, &fileHandle, fp);
-}
-
+}*/
 
 void removeFile(sgx_enclave_id_t eid) {
 	sgx_status_t r;
@@ -116,15 +122,22 @@ int main()
 	}
 
 	//Apri(o crea) -> scrivi -> leggi -> chiudi file
-	playWithFiles(ret, eid, buffer);
+	//playWithFiles(ret, eid, buffer);
 	
 	//Rimuovi un file già creato, aggiungere passaggio del filename?
 	//removeFile(eid);
+	char filename[] = "SGX_File_Protection_System.txt";
+
+	createNewFile(eid, ret, buffer, filename);
+	readFile(eid, ret, buffer, filename);
 
 	while (again) {
+		char sel[MAX_BUF_LEN];
 		printMenu();
 		printf("\n What do you do?:  ");
-		scanf_s("%d", &selection);
+		fgets(sel, sizeof(sel), stdin);
+		sscanf_s(sel, "%d", &selection);
+		//scanf_s("%d", &selection);
 		printf("Your selection is %d\n", selection);
 
 		if (selection == 3) {
@@ -138,13 +151,15 @@ int main()
 		if (selection == 1) {
 			char sec[100];
 			printf("Insert the new secret: ");
-			scanf_s("%9s", &sec, (unsigned)_countof(sec));
-			newSecret(eid, sec);
+			fgets(sec, sizeof(sec), stdin);
+			printf("New secret: %s", sec);
+			//scanf_s("%9s", &sec, (unsigned)_countof(sec));
+			//newSecret(eid, sec);
 		}
 
 		if (selection == 4) {
 			printf("The file content is: ");
-			passFile();
+			//passFile();
 		}
 	}
 
