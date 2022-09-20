@@ -12,7 +12,7 @@
 #define MAX_BUF_LEN 100
 
 void printMenu() {
-	printf("\n 1) Input a secret in the Enclave \n 2) Print the secret in the enclave \n 3) Exit\n 4) Open file");
+	printf("\n ---------TEE MENU--------- \n 0) Login \n 1) File list \n 2) Read an already used file sotred in the enclave  \n 3) Check Policy \n 4) Exit \n -------Utilty function-------- \n 5) Input a new secret in the enclave \n 6) Print the secret in the enclave  \n ------------------ \n");
 }
 
 void newSecret(sgx_enclave_id_t eid, char *sec) {
@@ -140,26 +140,45 @@ int main()
 		//scanf_s("%d", &selection);
 		printf("Your selection is %d\n", selection);
 
-		if (selection == 3) {
-			again = false;
-		}
-
-		if (selection == 2) {
-			prendiSecret(eid);
+		if (selection == 0) {
+			//TODO: Login
+			printf("LOGIN DONE!");
 		}
 
 		if (selection == 1) {
+			//TODO: File list
+			printf("FILE LIST");
+		}
+
+		if (selection == 2) {
+			//TODO: Read an aready used file stored in the enclave
+			printf("READ AN ALREADY USED FILE IN THE ENCLAVE");
+		}
+
+		if (selection == 3) {
+			//TODO: Check policy
+			//Questa funzione sarà invisibile all'utente, la inserisco perchè è utile per testarla
+			printf("CHECK POLICY");
+		}
+
+		if (selection == 4) {
+			//Exit to the app
+			again = false;
+		}
+
+		if (selection == 5) {
+			//Input a new secret in the Enclave
 			char sec[100];
 			printf("Insert the new secret: ");
 			fgets(sec, sizeof(sec), stdin);
 			printf("New secret: %s", sec);
 			//scanf_s("%9s", &sec, (unsigned)_countof(sec));
-			//newSecret(eid, sec);
+			newSecret(eid, sec);
 		}
 
-		if (selection == 4) {
-			printf("The file content is: ");
-			//passFile();
+		if (selection == 6) {
+			//Print the enclave secret
+			prendiSecret(eid);
 		}
 	}
 
