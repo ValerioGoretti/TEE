@@ -80,7 +80,7 @@ void playWithFiles(sgx_status_t ret, sgx_enclave_id_t eid, char *buffer) {
 	printf("Size of Read= %d\n", sizeOfRead);
 
 
-	//data[sizeOfRead] = '\0';
+	data[sizeOfRead] = '\0';
 	printf("Read file %s Data= %s\n", filename, data);
 
 	int32_t fileHandle;
