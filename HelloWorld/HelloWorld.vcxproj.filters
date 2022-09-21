@@ -42,5 +42,8 @@
     <Text Include="FileTracker.txt">
       <Filter>Source Files</Filter>
     </Text>
+    <Text Include="FileTrackerAppo.txt">
+      <Filter>Source Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>
