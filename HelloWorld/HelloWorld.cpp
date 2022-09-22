@@ -11,7 +11,7 @@
 #include "sgx_tprotected_fs.h"
 
 #define ENCLAVE_FILE _T("Enclave1.signed.dll")
-#define MAX_BUF_LEN 100
+#define MAX_BUF_LEN 1000
 
 
 /*
@@ -213,6 +213,83 @@ bool checkDate(int day, int month, int year) {
 }
 
 /*
+* ________________________ checkApplication _________________________
+ * Function: checkApplication
+ * ----------------------
+ *
+ *
+ * Parameters:
+ *   eid: enclave id
+ *
+ * Returns: void
+ */
+bool checkApplication(char* purpose, char* location, char* idApp) {
+	char support_p[MAX_BUF_LEN];
+	strcpy_s(support_p, MAX_BUF_LEN, purpose);
+	for (int i = 0; support_p[i]; i++) {
+		support_p[i] = tolower(support_p[i]);
+	}
+	char support_l[MAX_BUF_LEN];
+	strcpy_s(support_l, MAX_BUF_LEN, location);
+	for (int i = 0; support_l[i]; i++) {
+		support_l[i] = tolower(support_l[i]);
+	}
+
+	FILE* file;
+	char err[256];
+	errno_t e = fopen_s(&file, "C:/Users/Asus/Desktop/TESI_MAGISTRALE/TEE/HelloWorld/AppList.txt", "r");
+	char dom[MAX_BUF_LEN];
+	char loca[MAX_BUF_LEN];
+
+	if (file == NULL) {
+		strerror_s(err, 100, e);
+		printf("Unable to open file, the error is: %s", err);
+	}
+	else {
+		char buf[1000];
+		while (fgets(buf, 1000, file) != NULL) {
+			char* p = split(buf, 0);
+			if (strcmp(idApp, p) == 0) {
+				strcpy_s(dom, MAX_BUF_LEN, split(buf, 1));
+				strcpy_s(loca, MAX_BUF_LEN, split(buf, 2));
+			}
+		}
+		fclose(file);
+	}
+
+	char support_al[MAX_BUF_LEN];
+	char support_ap[MAX_BUF_LEN];
+
+	if (strlen(dom) != 0 && strlen(loca) != 0)
+	{
+		strcpy_s(support_ap, MAX_BUF_LEN, dom);
+		for (int i = 0; support_ap[i]; i++) {
+			support_ap[i] = tolower(support_ap[i]);
+		}
+		strcpy_s(support_al, MAX_BUF_LEN, loca);
+		for (int i = 0; support_al[i]; i++) {
+			support_al[i] = tolower(support_al[i]);
+		}
+	}
+
+	//printf("\nPURPOSE %s - %s", support_p, support_ap);
+	//printf("\nLEN PURPOSE %d - %d", strlen(support_p), strlen(support_ap));
+	//printf("\nLOCATION %s - %s", support_l, support_al);
+	//printf("\nLENLOCATION %d - %d", strlen(support_l), strlen(support_al));
+	support_al[strlen(support_al) - 1] = '\0';
+	if (strcmp(support_p,support_ap ) == 0) {
+		if (strcmp(support_l, support_al) == 0) {
+			return true;
+		} else {
+			printf("\nYou cannot access this resource from this location");
+		}
+	} else {
+		printf("\nThis resource has a different purpose");
+	}
+	return false;
+}
+
+/*
 * ________________________ resourceAccess _________________________
  * Function: resourceAccess
  * ----------------------
@@ -223,7 +300,7 @@ bool checkDate(int day, int month, int year) {
  *
  * Returns: void
  */
-void resourceAccess(sgx_enclave_id_t eid, const char* id) {
+void resourceAccess(sgx_enclave_id_t eid, char* id, char* idApp) {
 	FILE* file;
 	FILE* file2;
 	char err[256];
@@ -244,48 +321,58 @@ void resourceAccess(sgx_enclave_id_t eid, const char* id) {
 			char* p = split(buf, 0);
 			if (strcmp(id, p) == 0) {
 				char* fname = split(buf, 1);
-				int day = atoi(split(buf, 5));
-				int month = atoi(split(buf, 6));
-				int year = atoi(split(buf, 7));
-				if (checkDate(day,month,year)==0) {
-					printf("Expired File");
-					removeFile(eid, fname);
-				} else {
-					//printf("\n %s and %s are equal", id, p);
-					//printf("\n buf is %s ", buf);
-					//printf("\n fname -> %s ", fname);
-					int newA = atoi(split(buf, 3));
-					if (newA <= 0) {
-						printf("Maximum number of accesses reached");
+				char domain[MAX_BUF_LEN];
+				char loca[MAX_BUF_LEN];
+				strcpy_s(domain, MAX_BUF_LEN, split(buf, 2));
+				strcpy_s(loca, MAX_BUF_LEN, split(buf, 4));
+				if (checkApplication(domain, loca, idApp)) {
+					int day = atoi(split(buf, 5));
+					int month = atoi(split(buf, 6));
+					int year = atoi(split(buf, 7));
+					if (checkDate(day, month, year) == 0) {
+						printf("Expired File");
 						removeFile(eid, fname);
-					} else {
-						newA--;
-						//printf("newA has became %d", newA);
-						char mA[100];
-						sprintf_s(mA, 100, "%d", newA);
-						char d[5];
-						sprintf_s(d, 5, "%d", day);
-						char m[5];
-						sprintf_s(m, 5, "%d", month);
-						char y[10];
-						sprintf_s(y, 10, "%d", year);
-
-						fputs(id, file2);
-						fputs(",", file2);
-						fputs(split(buf, 1), file2);
-						fputs(",", file2);
-						fputs(split(buf, 2), file2);
-						fputs(",", file2);
-						fputs(mA, file2);
-						fputs(",", file2);
-						fputs(split(buf, 4), file2);
-						fputs(",", file2);
-						fputs(d, file2);
-						fputs(",", file2);
-						fputs(m, file2);
-						fputs(",", file2);
-						fputs(y, file2);
 					}
+					else {
+						//printf("\n %s and %s are equal", id, p);
+						//printf("\n buf is %s ", buf);
+						//printf("\n fname -> %s ", fname);
+						int newA = atoi(split(buf, 3));
+						if (newA <= 0) {
+							printf("Maximum number of accesses reached");
+							removeFile(eid, fname);
+						}
+						else {
+							newA--;
+							//printf("newA has became %d", newA);
+							char mA[100];
+							sprintf_s(mA, 100, "%d", newA);
+							char d[5];
+							sprintf_s(d, 5, "%d", day);
+							char m[5];
+							sprintf_s(m, 5, "%d", month);
+							char y[10];
+							sprintf_s(y, 10, "%d", year);
+
+							fputs(id, file2);
+							fputs(",", file2);
+							fputs(split(buf, 1), file2);
+							fputs(",", file2);
+							fputs(split(buf, 2), file2);
+							fputs(",", file2);
+							fputs(mA, file2);
+							fputs(",", file2);
+							fputs(split(buf, 4), file2);
+							fputs(",", file2);
+							fputs(d, file2);
+							fputs(",", file2);
+							fputs(m, file2);
+							fputs(",", file2);
+							fputs(y, file2);
+						}
+					}
+				} else {
+					fputs(buf, file2);
 				}
 			} else {
 				//printf("\n %s and %s are DIFFERENT", id, p);
@@ -496,6 +583,30 @@ int main()
 		//scanf_s("%d", &selection);
 		printf("Your selection is %d\n", selection);
 
+
+		if (selection == 0) {
+			char domain[MAX_BUF_LEN];
+			char loca[MAX_BUF_LEN];
+			char idApp[MAX_BUF_LEN];
+
+			printf("\nEnter the FILE PURPOSE: ");
+			fgets(domain, sizeof(domain), stdin);
+			//I cut the last element of the name because the insertion \n is present
+			domain[strlen(domain) - 1] = '\0';
+
+			printf("\nEnter the LOCATION: ");
+			fgets(loca, sizeof(loca), stdin);
+			//I cut the last element of the name because the insertion \n is present
+			loca[strlen(loca) - 1] = '\0';
+
+			printf("\nEnter the APPLICATION NAME: ");
+			fgets(idApp, sizeof(idApp), stdin);
+			//I cut the last element of the name because the insertion \n is present
+			idApp[strlen(idApp) - 1] = '\0';
+
+			checkApplication(domain, loca, idApp);
+		}
+
 		if (selection == 1) {
 			//TODO: File list
 			printf("\n___ FILE LIST ___ \n");
@@ -647,6 +758,7 @@ int main()
 			//I seguenti campi verranno passati da web3 in base al nome del file(identificativo) e alle policy, 
 			//li inseriamo poichè non è ancora presente una comunicazione tramite web3
 			char id[MAX_BUF_LEN];
+			char idApp[MAX_BUF_LEN];
 
 			printf("\nEnter the ID of the file you want to access: ");
 			fgets(id, sizeof(id), stdin);
@@ -654,11 +766,12 @@ int main()
 			id[strlen(id) - 1] = '\0';
 
 			printf("\nEnter the name of the application that wants to access: ");
-			fgets(id, sizeof(id), stdin);
+			fgets(idApp, sizeof(idApp), stdin);
 			//I cut the last element of the name because the insertion \n is present
-			id[strlen(id) - 1] = '\0';
+			idApp[strlen(idApp) - 1] = '\0';
 
-			resourceAccess(eid, id);
+
+			resourceAccess(eid, id, idApp);
 		}
 
 		if (selection == 11) {
