@@ -337,6 +337,7 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <Text Include="AppList.txt" />
     <Text Include="FileTracker.txt" />
     <Text Include="FileTrackerAppo.txt" />
     <Text Include="note.txt" />

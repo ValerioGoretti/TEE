@@ -1,6 +1,7 @@
 //#include "stdafx.h"
 #include <errno.h>
 #include <stdio.h>
+#include <time.h>
 #include <tchar.h>
 #include <string.h>
 #include "sgx_urts.h"
@@ -33,6 +34,7 @@ void printMenu() {
 				\n 8) Print the secret in the enclave  \
 				\n 9) Add file to FileTracker (Web3 call simulation) \
 				\n 10) Access to a resource (resourceAddress, Web3 call simulation when an application request a file) \
+				\n 11) AddApplication (Addapplication, Web3 simulation for allow permission to an application) \
 				\n ============================================ \n");
 }
 
@@ -135,7 +137,7 @@ void removeFile(sgx_enclave_id_t eid, char* filename) {
 * ----------------------
 * 
 * 
-* Structure of the tracker row  "0.ID , 1.Filename , 2.Domain , 3.maxAccess , 4.Location , 5.FinalTimestamp"
+* Structure of the tracker row  "0.ID , 1.Filename , 2.Domain , 3.maxAccess , 4.Location , 5.day, 6.month, 7,year"
 *
 * Parameters:
 *   
@@ -170,6 +172,47 @@ char* split(char* string1, int pos) {
 }
 
 /*
+* ________________________ checkDate _________________________
+ * Function: checkDate
+ * ----------------------
+ * 
+ *
+ * Parameters:
+ *   eid: enclave id
+ *
+ * Returns: void
+ */
+bool checkDate(int day, int month, int year) {
+	//printf("INPUT -> %d-%d-%d", day, month, year);
+	time_t t = time(NULL);
+	time_t now = time(0);
+	struct tm tm;
+	errno_t e = localtime_s(&tm, &t);
+	int current_y = tm.tm_year + 1900;
+	int current_m = tm.tm_mon + 1;
+	int current_d = tm.tm_mday;
+	//printf("CURRENT -> %d-%d-%d", current_d, current_m, current_y);
+	if (year > current_y) {
+		return true;
+	}
+	else {
+		if (year == current_y) {
+			if (month > current_m) {
+				return true;
+			}
+			else {
+				if (month == current_m) {
+					if (day >= current_d) {
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
+/*
 * ________________________ resourceAccess _________________________
  * Function: resourceAccess
  * ----------------------
@@ -200,34 +243,51 @@ void resourceAccess(sgx_enclave_id_t eid, const char* id) {
 			//printf("\n buf -> %s", buf);
 			char* p = split(buf, 0);
 			if (strcmp(id, p) == 0) {
-				//printf("\n %s and %s are equal", id, p);
-				//printf("\n buf is %s ", buf);
 				char* fname = split(buf, 1);
-				//printf("\n fname -> %s ", fname);
-				int newA= atoi(split(buf, 3));
-				if (newA<=0) {
-					printf("Maximum number of accesses reached");
-					removeFile(eid,fname);
+				int day = atoi(split(buf, 5));
+				int month = atoi(split(buf, 6));
+				int year = atoi(split(buf, 7));
+				if (checkDate(day,month,year)==0) {
+					printf("Expired File");
+					removeFile(eid, fname);
 				} else {
-					newA--;
-					//printf("newA has became %d", newA);
-					char mA[100];
-					sprintf_s(mA, 100, "%d", newA);
-					
-					fputs(id, file2);
-					fputs(",", file2);
-					fputs(split(buf, 1), file2);
-					fputs(",", file2);
-					fputs(split(buf, 2), file2);
-					fputs(",", file2);
-					fputs(mA, file2);
-					fputs(",", file2);
-					fputs(split(buf, 4), file2);
-					fputs(",", file2);
-					fputs(split(buf, 5), file2);
+					//printf("\n %s and %s are equal", id, p);
+					//printf("\n buf is %s ", buf);
+					//printf("\n fname -> %s ", fname);
+					int newA = atoi(split(buf, 3));
+					if (newA <= 0) {
+						printf("Maximum number of accesses reached");
+						removeFile(eid, fname);
+					} else {
+						newA--;
+						//printf("newA has became %d", newA);
+						char mA[100];
+						sprintf_s(mA, 100, "%d", newA);
+						char d[5];
+						sprintf_s(d, 5, "%d", day);
+						char m[5];
+						sprintf_s(m, 5, "%d", month);
+						char y[10];
+						sprintf_s(y, 10, "%d", year);
+
+						fputs(id, file2);
+						fputs(",", file2);
+						fputs(split(buf, 1), file2);
+						fputs(",", file2);
+						fputs(split(buf, 2), file2);
+						fputs(",", file2);
+						fputs(mA, file2);
+						fputs(",", file2);
+						fputs(split(buf, 4), file2);
+						fputs(",", file2);
+						fputs(d, file2);
+						fputs(",", file2);
+						fputs(m, file2);
+						fputs(",", file2);
+						fputs(y, file2);
+					}
 				}
-			}
-			else {
+			} else {
 				//printf("\n %s and %s are DIFFERENT", id, p);
 				fputs(buf, file2);
 			}
@@ -291,7 +351,7 @@ void createNewFileInEnclave(sgx_enclave_id_t eid, char* buffer, char* filename) 
  *
  * Returns: void
  */
-void AddFile(sgx_enclave_id_t eid, char* buffer, char* id, char* filename, char* purpose, int maxAccess,  char* location, int temporal) {
+void AddFile(sgx_enclave_id_t eid, char* buffer, char* id, char* filename, char* purpose, int maxAccess,  char* location, int day, int month, int year) {
 	FILE* file;
 	char err[256];
 	//errno_t e= fopen_s(&file,"FileTracker.txt", "r");
@@ -302,10 +362,15 @@ void AddFile(sgx_enclave_id_t eid, char* buffer, char* id, char* filename, char*
 		printf("Unable to open file, the error is: %s", err);
 	}
 	else {
+		char newline[3]="\n";
 		char mA[100];
-		char tem[100];
+		char y[10];
+		char d[5];
+		char m[5];
 		sprintf_s(mA, 100, "%d", maxAccess);
-		sprintf_s(tem, 100, "%d", temporal);
+		sprintf_s(y, 10, "%d", year);
+		sprintf_s(m, 5, "%d", month);
+		sprintf_s(d, 5, "%d", day);
 
 		fputs(id, file);
 		fputs(",", file);
@@ -317,8 +382,12 @@ void AddFile(sgx_enclave_id_t eid, char* buffer, char* id, char* filename, char*
 		fputs(",", file);
 		fputs(location, file);
 		fputs(",", file);
-		fputs(tem, file);
-		fputs("\n", file);
+		fputs(d, file);
+		fputs(",", file);
+		fputs(m, file);
+		fputs(",", file);
+		fputs(y, file);
+		fputs(newline, file);
 		fclose(file);
 	}
 	createNewFileInEnclave(eid, buffer, filename);
@@ -352,6 +421,37 @@ void fileTrackerList() {
 	}
 }
 
+/*
+* ________________________ AddApplication _________________________
+ * Function: AddApplication
+ * -----------------------
+ * 
+ * Parameters:
+ *
+ *
+ * Returns: void
+ */
+void AddApplication(char* name, char* domain, char* position) {
+	FILE* file;
+	char err[256];
+	errno_t e = fopen_s(&file, "C:/Users/Asus/Desktop/TESI_MAGISTRALE/TEE/HelloWorld/AppList.txt", "a");
+
+	if (file == NULL) {
+		strerror_s(err, 100, e);
+		printf("Unable to open file, the error is: %s", err);
+	}
+	else {
+		char newline[3] = "\n";
+
+		fputs(name, file);
+		fputs(",", file);
+		fputs(domain, file);
+		fputs(",", file);
+		fputs(position, file);
+		fputs(newline, file);
+		fclose(file);
+	}
+}
 
 /*
 *________________________ main _________________________
@@ -481,8 +581,10 @@ int main()
 			char domain[MAX_BUF_LEN];
 			char location[MAX_BUF_LEN];
 			char maxA_c[MAX_BUF_LEN];
-			char time_c[MAX_BUF_LEN];
-			int maxA_i=1, time_i=1;
+			char time_c_d[5];
+			char time_c_m[5];
+			char time_c_y[10];
+			int maxA_i=1, time_i_d=1, time_i_m = 1, time_i_y = 1;
 
 			printf("\nEnter the ID of the file you want to add: ");
 			fgets(id, sizeof(id), stdin);
@@ -515,13 +617,27 @@ int main()
 			maxA_c[strlen(maxA_c) - 1] = '\0';
 			maxA_i = atoi(maxA_c);
 
-			printf("\nEnter the date: ");
-			fgets(time_c, sizeof(time_c), stdin);
+			printf("\nEnter the year: ");
+			fgets(time_c_y, sizeof(time_c_y), stdin);
 			//I cut the last element of the name because the insertion \n is present
-			time_c[strlen(time_c) - 1] = '\0';
-			time_i = atoi(time_c);
+			time_c_y[strlen(time_c_y) - 1] = '\0';
+			time_i_y = atoi(time_c_y);
 
-			AddFile(eid, content, id,name, domain, maxA_i, location, time_i);
+			printf("\nEnter the month: ");
+			fgets(time_c_m, sizeof(time_c_m), stdin);
+			//I cut the last element of the name because the insertion \n is present
+			time_c_m[strlen(time_c_m) - 1] = '\0';
+			time_i_m = atoi(time_c_m);
+
+			printf("\nEnter the day: ");
+			fgets(time_c_d, sizeof(time_c_d), stdin);
+			//I cut the last element of the name because the insertion \n is present
+			time_c_d[strlen(time_c_d) - 1] = '\0';
+			time_i_d = atoi(time_c_d);
+
+			//printf("%d-%d-%d", time_i_d, time_i_m, time_i_y);
+			AddFile(eid, content, id, name, domain, maxA_i, location, time_i_d, time_i_m, time_i_y);
+			//AddFile(eid, content, id, name, domain, maxA_i, location, time_i_y);
 			//AddFile("id1","Hello", "medical", 10, "Rome", 20);
 		}
 
@@ -537,7 +653,39 @@ int main()
 			//I cut the last element of the name because the insertion \n is present
 			id[strlen(id) - 1] = '\0';
 
+			printf("\nEnter the name of the application that wants to access: ");
+			fgets(id, sizeof(id), stdin);
+			//I cut the last element of the name because the insertion \n is present
+			id[strlen(id) - 1] = '\0';
+
 			resourceAccess(eid, id);
+		}
+
+		if (selection == 11) {
+			//Add file to filetracker 
+			//Questo task è chiamato da WEB3, l'utilizzo nel menù è solo per una questione di comodità
+			//I seguenti campi verranno passati da web3 in base al nome del file(identificativo) e alle policy, 
+			//li inseriamo poichè non è ancora presente una comunicazione tramite web3
+			char name[MAX_BUF_LEN];
+			char domain[MAX_BUF_LEN];
+			char location[MAX_BUF_LEN];
+
+			printf("\nEnter the name of the application: ");
+			fgets(name, sizeof(name), stdin);
+			//I cut the last element of the name because the insertion \n is present
+			name[strlen(name) - 1] = '\0';
+
+			printf("\nEnter the domain application: ");
+			fgets(domain, sizeof(domain), stdin);
+			//I cut the last element of the name because the insertion \n is present
+			domain[strlen(domain) - 1] = '\0';
+
+			printf("\nEnter the location of the application: ");
+			fgets(location, sizeof(location), stdin);
+			//I cut the last element of the name because the insertion \n is present
+			location[strlen(location) - 1] = '\0';
+
+			AddApplication(name, domain, location);
 		}
 	}
 
