@@ -9,10 +9,18 @@
 #include "Enclave1_u.h"
 #include <inttypes.h>
 #include "sgx_tprotected_fs.h"
+#include "RSA.cpp"
 
 #define ENCLAVE_FILE _T("Enclave1.signed.dll")
 #define MAX_BUF_LEN 1000
 
+
+
+void printNelement(char* arr, int n) {
+	for (int i = 0; i < n; i++) {
+		printf("%c",arr[i]);
+	}
+}
 
 /*
  * Function: printMenu
@@ -100,7 +108,11 @@ void readFile(sgx_enclave_id_t eid, char* filename) {
 	size_t sizeOfRead = 0;
 	char data[MAX_BUF_LEN];
 	ret = ecall_file_read(eid, &sizeOfRead, fp, data);
-	printf("Read file %s Data= %s\n", filename, data);
+	//printf("Read file %s Data= %s\n", filename, data);
+	printNelement(data, sizeOfRead);
+	//printf("\nDATA= %s\n", data);
+	//printf("\nLEN DATA= %d\n", strlen(data));
+	//printf("%zu\n", sizeOfRead);
 
 	//Close File
 	int32_t fileHandle;
@@ -621,7 +633,7 @@ int main()
 			fgets(name, sizeof(name), stdin);
 			//I cut the last element of the name because the insertion \n is present
 			name[strlen(name) - 1] = '\0';
-			printf("The file name is: %s", name);
+			//printf("The file name is: %s", name);
 			readFile(eid, name);
 		}
 
@@ -799,6 +811,29 @@ int main()
 			location[strlen(location) - 1] = '\0';
 
 			AddApplication(name, domain, location);
+		}
+
+		if (selection == 20) {
+			int p=generatePrimeNumbers();
+			int q=generatePrimeNumbers();
+			int n = p * q;
+			printf("%d * %d = %d", p,q,n);
+			int totient = (p - 1) * (q - 1);
+			printf("\nTOTIENT %d", totient);
+			int e = exponent(totient, p, q);
+			printf("\nexponent %d", e);
+			//k can be any arbitrary value
+			int k = 2;
+			int d = (1 + (k * totient)) / e;
+			printf("\nd %d", d);
+
+			char str[MAX_BUF_LEN];
+
+			printf("\nEnter the string: ");
+			fgets(str, sizeof(str), stdin);
+			//I cut the last element of the name because the insertion \n is present
+			str[strlen(str) - 1] = '\0';
+
 		}
 	}
 

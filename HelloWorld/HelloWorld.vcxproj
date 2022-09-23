@@ -304,6 +304,7 @@
       </PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="HelloWorld.cpp" />
+    <ClCompile Include="RSA.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Enclave1_u.h" />

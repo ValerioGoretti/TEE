@@ -43,17 +43,17 @@ SGX_FILE* ecall_file_open(const char* filename, const char* mode)
 	return a;
 }
 
-size_t ecall_file_write(SGX_FILE* fp, char data[100])
+size_t ecall_file_write(SGX_FILE* fp, char *data)
 {
 	size_t sizeofWrite;
 	size_t len = strlen(data);
 	sizeofWrite = sgx_fwrite(data, sizeof(char), len, fp);
 
-	/*for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 5; i++)
 	{
 		char buffer[] = { 'x' , 'c' };
 		sizeofWrite += sgx_fwrite(buffer, sizeof(char), sizeof(buffer), fp);
-	}*/
+	}
 
 	return sizeofWrite;
 }

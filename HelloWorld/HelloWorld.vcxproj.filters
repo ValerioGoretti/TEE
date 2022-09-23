@@ -24,6 +24,9 @@
     <ClCompile Include="Enclave1_u.c">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="RSA.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Enclave1_u.h">
