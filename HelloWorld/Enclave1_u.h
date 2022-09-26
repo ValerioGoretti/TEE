@@ -6,8 +6,8 @@
 #include <stddef.h>
 #include <string.h>
 #include "sgx_edger8r.h" /* for sgx_status_t etc. */
-#include <sgx_tprotected_fs.h>
 
+#include <sgx_tprotected_fs.h>
 
 #define SGX_CAST(type, item) ((type)(item))
 
