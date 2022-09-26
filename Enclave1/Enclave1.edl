@@ -14,7 +14,6 @@ enclave {
 		public size_t ecall_file_read([user_check]SGX_FILE* fp,[in,out,string]char* readData);
 		public int32_t ecall_file_close([user_check]SGX_FILE* fp);
 		public int32_t ecall_file_delete([in, string]char* filename);
-
     };
 
     untrusted {
@@ -22,3 +21,13 @@ enclave {
 
     };
 };
+
+
+
+
+
+
+
+
+
+

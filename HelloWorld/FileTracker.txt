@@ -1,3 +1,2 @@
 1,a.txt,medical,30,milan,27,9,2022
-2,b.txt,law,20,rome,10,2,2023
-3,c.txt,medical,39,rome,20,12,2020
+2,b.txt,medical,20,rome,10,2,2023
