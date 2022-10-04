@@ -46,6 +46,15 @@ void printMenu() {
 				\n ============================================ \n");
 }
 
+
+void printMenu2() {
+	printf("\n ================= TEE MENU ================= \
+				\n 1) list of files in the trusted part \
+				\n 2) Request a new resource from the data market\
+				\n 3) Close The application \
+				\n ============================================ \n");
+}
+
 /*
 * ________________________ newSecret _________________________
  * Function: newSecret
@@ -588,7 +597,8 @@ int main()
 
 	while (again) {
 		char sel[MAX_BUF_LEN];
-		printMenu();
+		//printMenu();
+		printMenu2();
 		printf("\nWhat do you do?:  ");
 		fgets(sel, sizeof(sel), stdin);
 		sscanf_s(sel, "%d", &selection);
