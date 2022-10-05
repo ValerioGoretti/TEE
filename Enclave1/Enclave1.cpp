@@ -6,6 +6,8 @@
 #include "string.h"
 #include "stdlib.h"
 #include "math.h"
+#include "../../../../../../Program Files (x86)/Windows Kits/10/Include/10.0.19041.0/ucrt/stdlib.h"
+#include "../../../../../../Program Files (x86)/Windows Kits/10/Include/10.0.19041.0/ucrt/time.h"
 
 char* secret = "Hello App!";
 long int p, q, n, t, flag, e[100], d[100], temp[100], j, m[100], en[100], i;
@@ -178,4 +180,17 @@ void decrypt() {
     /*printf("\nTHE DECRYPTED MESSAGE IS\n");
     for (i = 0; m[i] != -1; i++)
         printf("%c", m[i]);*/
+}
+
+
+int generatePrimeNumbers(int x) {
+    //int primeNumbers[4] = {2, 3, 5, 7};
+    int primeNumbers[10] = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29 };
+   
+    srand(time(NULL) + (x * x));
+    int randomIndex = rand() % 10;
+    //printf("\n%d", randomIndex);
+    int randomValue = primeNumbers[randomIndex];
+    //printf("\n-> %d", randomValue);
+    return randomValue;
 }
