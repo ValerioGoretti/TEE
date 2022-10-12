@@ -1,2 +1,2 @@
 C:\Users\Asus\Desktop\TESI_MAGISTRALE\ProvaSGX\HelloWorld\Simulation\HelloWorld.exe
-C:\Users\Asus\Desktop\TESI_MAGISTRALE\TEE\HelloWorld\Simulation\HelloWorld.exe
+C:\Users\Asus\Desktop\TESI_MAGISTRALE\TEE\HelloWorld\Simulation\Application.exe
