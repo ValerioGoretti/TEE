@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.32802.440
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HelloWorld", "HelloWorld.vcxproj", "{72DCEB77-433E-4BAF-8681-448A9205B3F6}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Application", "Application.vcxproj", "{72DCEB77-433E-4BAF-8681-448A9205B3F6}"
 	ProjectSection(ProjectDependencies) = postProject
 		{600A676A-485B-47F5-A9A8-31E071096BB7} = {600A676A-485B-47F5-A9A8-31E071096BB7}
 	EndProjectSection

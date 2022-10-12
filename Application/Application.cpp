@@ -258,7 +258,7 @@ bool checkApplication(char* purpose, char* location, char* idApp) {
 
 	FILE* file;
 	char err[256];
-	errno_t e = fopen_s(&file, "C:/Users/Asus/Desktop/TESI_MAGISTRALE/TEE/HelloWorld/AppList.txt", "r");
+	errno_t e = fopen_s(&file, "C:/Users/Asus/Desktop/TESI_MAGISTRALE/TEE/Application/AppList.txt", "r");
 	char dom[MAX_BUF_LEN];
 	char loca[MAX_BUF_LEN];
 
@@ -326,10 +326,10 @@ void resourceAccess(sgx_enclave_id_t eid, char* id, char* idApp) {
 	FILE* file2;
 	char err[256];
 	//errno_t e= fopen_s(&file,"FileTracker.txt", "r");
-	//rename("C:/Users/Asus/Desktop/TESI_MAGISTRALE/TEE/HelloWorld/FileTracker.txt", "C:/Users/Asus/Desktop/TESI_MAGISTRALE/TEE/HelloWorld/FileTrackerAppo.txt");
+	//rename("C:/Users/Asus/Desktop/TESI_MAGISTRALE/TEE/Application/FileTracker.txt", "C:/Users/Asus/Desktop/TESI_MAGISTRALE/TEE/Application/FileTrackerAppo.txt");
 
-	errno_t e = fopen_s(&file, "C:/Users/Asus/Desktop/TESI_MAGISTRALE/TEE/HelloWorld/FileTracker.txt", "r");
-	errno_t e2 = fopen_s(&file2, "C:/Users/Asus/Desktop/TESI_MAGISTRALE/TEE/HelloWorld/FileTrackerAppo.txt", "w+");
+	errno_t e = fopen_s(&file, "C:/Users/Asus/Desktop/TESI_MAGISTRALE/TEE/Application/FileTracker.txt", "r");
+	errno_t e2 = fopen_s(&file2, "C:/Users/Asus/Desktop/TESI_MAGISTRALE/TEE/Application/FileTrackerAppo.txt", "w+");
 
 	if (file == NULL || file2 == NULL) {
 		strerror_s(err, 100, e);
@@ -402,12 +402,12 @@ void resourceAccess(sgx_enclave_id_t eid, char* id, char* idApp) {
 		}
 		fclose(file);
 		fclose(file2);
-		if (remove("C:/Users/Asus/Desktop/TESI_MAGISTRALE/TEE/HelloWorld/FileTracker.txt") == 0)
+		if (remove("C:/Users/Asus/Desktop/TESI_MAGISTRALE/TEE/Application/FileTracker.txt") == 0)
 			printf("");
 		else
 			printf("Unable to delete the file");
 
-		rename("C:/Users/Asus/Desktop/TESI_MAGISTRALE/TEE/HelloWorld/FileTrackerAppo.txt", "C:/Users/Asus/Desktop/TESI_MAGISTRALE/TEE/HelloWorld/FileTracker.txt");
+		rename("C:/Users/Asus/Desktop/TESI_MAGISTRALE/TEE/Application/FileTrackerAppo.txt", "C:/Users/Asus/Desktop/TESI_MAGISTRALE/TEE/Application/FileTracker.txt");
 	}
 }
 
@@ -463,7 +463,7 @@ void AddFile(sgx_enclave_id_t eid, char* buffer, char* id, char* filename, char*
 	FILE* file;
 	char err[256];
 	//errno_t e= fopen_s(&file,"FileTracker.txt", "r");
-	errno_t e = fopen_s(&file, "C:/Users/Asus/Desktop/TESI_MAGISTRALE/TEE/HelloWorld/FileTracker.txt", "a");
+	errno_t e = fopen_s(&file, "C:/Users/Asus/Desktop/TESI_MAGISTRALE/TEE/Application/FileTracker.txt", "a");
 
 	if (file == NULL) {
 		strerror_s(err, 100, e);
@@ -515,7 +515,7 @@ void AddFile(sgx_enclave_id_t eid, char* buffer, char* id, char* filename, char*
 void fileTrackerList() {
 	FILE* file;
 	char err[256];
-	errno_t e= fopen_s(&file,"C:/Users/Asus/Desktop/TESI_MAGISTRALE/TEE/HelloWorld/FileTracker.txt", "r");
+	errno_t e= fopen_s(&file,"C:/Users/Asus/Desktop/TESI_MAGISTRALE/TEE/Application/FileTracker.txt", "r");
 
 	if (file == NULL) {
 		strerror_s(err, 100, e);
@@ -542,7 +542,7 @@ void fileTrackerList() {
 void AddApplication(char* name, char* domain, char* position) {
 	FILE* file;
 	char err[256];
-	errno_t e = fopen_s(&file, "C:/Users/Asus/Desktop/TESI_MAGISTRALE/TEE/HelloWorld/AppList.txt", "a");
+	errno_t e = fopen_s(&file, "C:/Users/Asus/Desktop/TESI_MAGISTRALE/TEE/Application/AppList.txt", "a");
 
 	if (file == NULL) {
 		strerror_s(err, 100, e);
