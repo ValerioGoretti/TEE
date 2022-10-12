@@ -4,12 +4,16 @@
 #include <string.h>
 #include "sgx_tprotected_fs.h"
 #include "string.h"
+#include <tlibc/stdlib.h>
+/*
 #include "stdlib.h"
 #include "math.h"
 #include "../../../../../../Program Files (x86)/Windows Kits/10/Include/10.0.19041.0/ucrt/stdlib.h"
-#include "../../../../../../Program Files (x86)/Windows Kits/10/Include/10.0.19041.0/ucrt/time.h"
+#include "../../../../../../Program Files (x86)/Windows Kits/10/Include/10.0.19041.0/ucrt/time.h"*/
 
 char* secret = "Hello App!";
+
+/*
 long int p, q, n, t, flag, e[100], d[100], temp[100], j, m[100], en[100], i;
 char msg[100];
 
@@ -17,7 +21,7 @@ int prime(long int);
 void ce();
 long int cd(long int);
 void encrypt();
-void decrypt();
+void decrypt();*/
 
 void getSecret(char* buf, size_t len)
 {
@@ -100,6 +104,9 @@ int32_t ecall_file_delete(char* filename)
 	return a;
 }
 
+
+/*
+
 int prime(long int pr) {
     int i;
     j = sqrt(pr);
@@ -157,9 +164,9 @@ void encrypt() {
         i++;
     }
     en[i] = -1;
-    /*printf("\nTHE ENCRYPTED MESSAGE IS\n");
+    printf("\nTHE ENCRYPTED MESSAGE IS\n");
     for (i = 0; en[i] != -1; i++)
-        printf("%c", en[i]);*/
+        printf("%c", en[i]);
 }
 
 void decrypt() {
@@ -177,15 +184,15 @@ void decrypt() {
         i++;
     }
     m[i] = -1;
-    /*printf("\nTHE DECRYPTED MESSAGE IS\n");
+    printf("\nTHE DECRYPTED MESSAGE IS\n");
     for (i = 0; m[i] != -1; i++)
-        printf("%c", m[i]);*/
+        printf("%c", m[i]);
 }
 
 
 int generatePrimeNumbers(int x) {
     //int primeNumbers[4] = {2, 3, 5, 7};
-    int primeNumbers[10] = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29 };
+    int primeNumbers[10] = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29};
    
     srand(time(NULL) + (x * x));
     int randomIndex = rand() % 10;
@@ -193,4 +200,4 @@ int generatePrimeNumbers(int x) {
     int randomValue = primeNumbers[randomIndex];
     //printf("\n-> %d", randomValue);
     return randomValue;
-}
+}*/

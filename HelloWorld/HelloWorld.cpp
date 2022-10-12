@@ -49,7 +49,7 @@ void printMenu() {
 
 void printMenu2() {
 	printf("\n ================= TEE MENU ================= \
-				\n 1) list of files in the trusted part \
+				\n 1) List of files in the trusted part \
 				\n 2) Request a new resource from the data market\
 				\n 3) Close The application \
 				\n ============================================ \n");
@@ -599,7 +599,7 @@ int main()
 		char sel[MAX_BUF_LEN];
 		//printMenu();
 		printMenu2();
-		printf("\nWhat do you do?:  ");
+		printf("\n What do you do?:  ");
 		fgets(sel, sizeof(sel), stdin);
 		sscanf_s(sel, "%d", &selection);
 		//scanf_s("%d", &selection);

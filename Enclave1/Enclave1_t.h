@@ -5,8 +5,8 @@
 #include <wchar.h>
 #include <stddef.h>
 #include "sgx_edger8r.h" /* for sgx_ocall etc. */
-#include <sgx_tprotected_fs.h>
 
+#include <sgx_tprotected_fs.h>
 
 #define SGX_CAST(type, item) ((type)(item))
 
